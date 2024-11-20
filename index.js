@@ -91,7 +91,7 @@ const dbConnect = async () => {
 
     // get product
     app.get("/all-product", async (req, res) => {
-      const { title, sort, brand, category } = req.query;
+      const { title, sort, brand, category, page =  1 , limit = 9 } = req.query;
       const query = {}
       if (title) {
         query.title = { $regex: title, $options: "i" }
@@ -102,10 +102,16 @@ const dbConnect = async () => {
       if (brand) {
         query.brand = brand;
       }
+
+      const pageNumber = Number(page)
+      const limitNumber = Number(limit)
+
       const sortOption = sort === "asc" ? 1 : -1
 
       const products = await productCollection
       .find(query)
+      .skip((pageNumber - 1)*limitNumber)
+      .limit(limitNumber)
       .sort({ price: sortOption })
       .toArray();
 

@@ -100,10 +100,14 @@ const dbConnect = async () => {
         query.category = { $regex: category, $options: "i" }
       }
       if (brand) {
-        query.brand = brand
+        query.brand = brand;
       }
       const sortOption = sort === "asc" ? 1 : -1
-      const products = await productCollection.find(query).sort({ price: sortOption }).toArray();
+
+      const products = await productCollection
+      .find(query)
+      .sort({ price: sortOption })
+      .toArray();
 
       const totalProducts = await productCollection.countDocuments(query)
       
@@ -111,11 +115,11 @@ const dbConnect = async () => {
       const productInfo =  await productCollection.find({}, {projection: {category:1 ,  brand:1}}).toArray();
 
 
-      const categories = [...new Set (productInfo.map(item => item.category))];
+      const categories = [...new Set (productInfo.map(product => product.category))];
       
-      const brands = [...new Set (productInfo.map(item => item.brand))];
+      const brands = [...new Set (productInfo.map(product => product.brand))];
 
-      res.send(products, brands, categories, totalProducts);
+      res.send({products, brands, categories, totalProducts});
     })
 
   } catch (error) {

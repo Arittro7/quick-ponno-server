@@ -103,15 +103,19 @@ const dbConnect = async () => {
         query.brand = brand
       }
       const sortOption = sort === "asc" ? 1 : -1
-      const products = await productCollection.find(query).sort({ price: sortOption }).toArray()
+      const products = await productCollection.find(query).sort({ price: sortOption }).toArray();
+
+      const totalProducts = await productCollection.countDocuments(query)
       
       //dynamic filter options for products  
       const productInfo =  await productCollection.find({}, {projection: {category:1 ,  brand:1}}).toArray();
 
-      const brand = [...new Set (productInfo.map(item => item.brand))];
-      const category = [...new Set (productInfo.map(item => item.category))];
 
-      res.send(products);
+      const categories = [...new Set (productInfo.map(item => item.category))];
+      
+      const brands = [...new Set (productInfo.map(item => item.brand))];
+
+      res.send(products, brands, categories, totalProducts);
     })
 
   } catch (error) {

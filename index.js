@@ -104,20 +104,25 @@ const dbConnect = async () => {
       }
       const sortOption = sort === "asc" ? 1 : -1
       const products = await productCollection.find(query).sort({ price: sortOption }).toArray()
+      
+      //dynamic filter options for products  
+      const productInfo =  await productCollection.find({}, {projection: {category:1 ,  brand:1}}).toArray();
+
+      const brand = [...new Set (productInfo.map(item => item.brand))];
+      const category = [...new Set (productInfo.map(item => item.category))];
+
       res.send(products);
     })
 
-} catch (error) {
-  console.log(error.name, error.message);
+  } catch (error) {
+    console.log(error.name, error.message);
+  }
 }
-}
-
-
 
 dbConnect()
 // api
 app.get('/', (req, res) => {
-  res.send('The Final Run Gadget Shop')
+  res.send('The Final Run Quick Ponno')
 })
 
 // jwt
@@ -131,5 +136,5 @@ app.post('/authentication', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Gadget Port is running on port: ${port}`);
+  console.log(`QuickPonno Port is running on port: ${port}`);
 })

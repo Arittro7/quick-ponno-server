@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -116,16 +116,25 @@ const dbConnect = async () => {
       .toArray();
 
       const totalProducts = await productCollection.countDocuments(query)
-      
-      //dynamic filter options for products  
-      const productInfo =  await productCollection.find({}, {projection: {category:1 ,  brand:1}}).toArray();
+     
 
-
-      const categories = [...new Set (productInfo.map(product => product.category))];
+      const categories = [...new Set (products.map(product => product.category))];
       
-      const brands = [...new Set (productInfo.map(product => product.brand))];
+      const brands = [...new Set (products.map(product => product.brand))];
 
       res.send({products, brands, categories, totalProducts});
+    })
+
+    // wishlist 
+    app.post("/wishlist/add", verifyJWT, async (req, res) => {
+      const {userEmail, productId} = req.body
+
+      const result = await userCollection.updateOne(
+        { email: userEmail },
+        {$addToSet: { wishlist: new ObjectId(String(productId)) }}
+      );
+      res.send(result)
+
     })
 
   } catch (error) {

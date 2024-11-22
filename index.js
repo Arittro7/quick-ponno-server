@@ -126,14 +126,28 @@ const dbConnect = async () => {
     })
 
     // wishlist 
-    app.post("/wishlist/add", verifyJWT, async (req, res) => {
+    app.patch("/wishlist/add", async (req, res) => {
       const {userEmail, productId} = req.body
 
       const result = await userCollection.updateOne(
         { email: userEmail },
-        {$addToSet: { wishlist: new ObjectId(String(productId)) }}
+        { $addToSet: { wishlist: new ObjectId(String(productId)) }}
       );
       res.send(result)
+
+    })
+
+    // get wishlist products
+    app.get("/wishlist/:userId", verifyJWT, async (req, res) => {
+      const userId = req.params.userId
+      const user = await userCollection.findOne({ _id: new ObjectId(String(userId)) 
+      })
+
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+    
 
     })
 

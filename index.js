@@ -91,7 +91,7 @@ const dbConnect = async () => {
 
     // get product
     app.get("/all-product", async (req, res) => {
-      const { title, sort, brand, category, page =  1 , limit = 9 } = req.query;
+      const { title, sort, brand, category, page = 1, limit = 9 } = req.query;
       const query = {}
       if (title) {
         query.title = { $regex: title, $options: "i" }
@@ -109,29 +109,29 @@ const dbConnect = async () => {
       const sortOption = sort === "asc" ? 1 : -1
 
       const products = await productCollection
-      .find(query)
-      .skip((pageNumber - 1)*limitNumber)
-      .limit(limitNumber)
-      .sort({ price: sortOption })
-      .toArray();
+        .find(query)
+        .skip((pageNumber - 1) * limitNumber)
+        .limit(limitNumber)
+        .sort({ price: sortOption })
+        .toArray();
 
       const totalProducts = await productCollection.countDocuments(query)
-     
 
-      const categories = [...new Set (products.map(product => product.category))];
-      
-      const brands = [...new Set (products.map(product => product.brand))];
 
-      res.send({products, brands, categories, totalProducts});
+      const categories = [...new Set(products.map(product => product.category))];
+
+      const brands = [...new Set(products.map(product => product.brand))];
+
+      res.send({ products, brands, categories, totalProducts });
     })
 
     // wishlist 
     app.patch("/wishlist/add", async (req, res) => {
-      const {userEmail, productId} = req.body
+      const { userEmail, productId } = req.body
 
       const result = await userCollection.updateOne(
         { email: userEmail },
-        { $addToSet: { wishlist: new ObjectId(String(productId)) }}
+        { $addToSet: { wishlist: new ObjectId(String(productId)) } }
       );
       res.send(result)
 
@@ -140,15 +140,19 @@ const dbConnect = async () => {
     // get wishlist products
     app.get("/wishlist/:userId", verifyJWT, async (req, res) => {
       const userId = req.params.userId
-      const user = await userCollection.findOne({ _id: new ObjectId(String(userId)) 
+      const user = await userCollection.findOne({
+        _id: new ObjectId(String(userId))
       })
 
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
 
-    
+      const wishlist = await productCollection.find(
+        { _id: { $in: user.wishlist || [] } }
+      ).toArray()
 
+      res.send(wishlist)
     })
 
   } catch (error) {

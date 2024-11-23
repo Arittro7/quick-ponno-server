@@ -197,6 +197,13 @@ app.patch("/user/promote", verifyJWT, verifyAdmin, async (req, res) => {
   res.send(result);
 });
 
+// Delete a seller
+app.delete("/user/delete", verifyJWT, verifyAdmin, async (req, res) => {
+  const { email } = req.body; // The seller's email
+  const result = await userCollection.deleteOne({ email: email });
+  res.send(result);
+});
+
 dbConnect()
 // api
 app.get('/', (req, res) => {

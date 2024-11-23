@@ -187,6 +187,16 @@ const dbConnect = async () => {
   }
 }
 
+// The King Admin 💒
+app.patch("/user/promote", verifyJWT, verifyAdmin, async (req, res) => {
+  const { email } = req.body; 
+  const result = await userCollection.updateOne(
+    { email: email },
+    { $set: { role: "seller" } }
+  );
+  res.send(result);
+});
+
 dbConnect()
 // api
 app.get('/', (req, res) => {

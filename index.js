@@ -204,6 +204,12 @@ app.delete("/user/delete", verifyJWT, verifyAdmin, async (req, res) => {
   res.send(result);
 });
 
+// Get all users
+app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
+  const users = await userCollection.find().toArray();
+  res.send(users);
+});
+
 dbConnect()
 // api
 app.get('/', (req, res) => {

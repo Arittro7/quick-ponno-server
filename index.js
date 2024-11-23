@@ -9,7 +9,10 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173",
+      "https://ghore-dokan.web.app",
+      "https://ghore-dokan.firebaseapp.com"
+    ],
     optionsSuccessStatus: 200,
   })
 );
@@ -41,6 +44,18 @@ const verifySeller = async (req, res, next) => {
   }
   next()
 }
+
+// verify admin middleware
+const verifyAdmin = async (req, res, next) => {
+  const email = req.decoded.email;
+  const query = { email: email };
+  const user = await userCollection.findOne(query);
+  if (user?.role !== "admin") {
+    return res.status(403).send({ message: "Forbidden Access" });
+  }
+  next();
+};
+
 
 // mongodb
 
